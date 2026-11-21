@@ -1,0 +1,551 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>하천 지킴이</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 모바일 앱 한 화면 구조. 상단 물빛 헤더, 본문 카드, 하단 탭 바. */
+:root {
+  --bg: #F1F8FA;
+  --surface: #FFFFFF;
+  --fg: #0E2A33;
+  --muted: #55717C;
+  --line: #D3E5EB;
+  --accent: #0B7FA3;
+  --accent-fg: #FFFFFF;
+  --tint: #E1F2F7;
+  --hero: #0B6F93;
+  --hero-fg: #FFFFFF;
+  --good: #1F7A3E;
+  --good-bg: #E2F4E8;
+  --warn: #9A5A06;
+  --warn-bg: #FCEFD8;
+  --bad: #B3362B;
+  --bad-bg: #FBE4E1;
+  --font-display: "Do Hyeon", "Noto Sans KR", sans-serif;
+  --font-body: "Noto Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0A1A20; --surface: #11262E; --fg: #E3F0F4; --muted: #8FABB5; --line: #22404A;
+    --accent: #46C3E8; --accent-fg: #03212B; --tint: #15343F; --hero: #0F4A60; --hero-fg: #F1FAFD;
+    --good: #6AD08A; --good-bg: #163A25; --warn: #F0B35A; --warn-bg: #3D2B10; --bad: #F08A7E; --bad-bg: #411D19;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0A1A20; --surface: #11262E; --fg: #E3F0F4; --muted: #8FABB5; --line: #22404A;
+  --accent: #46C3E8; --accent-fg: #03212B; --tint: #15343F; --hero: #0F4A60; --hero-fg: #F1FAFD;
+  --good: #6AD08A; --good-bg: #163A25; --warn: #F0B35A; --warn-bg: #3D2B10; --bad: #F08A7E; --bad-bg: #411D19;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  padding-bottom: 92px;
+  word-break: keep-all; overflow-wrap: anywhere;
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: 0.01em; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 560px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* hero */
+.hero { background: var(--hero); color: var(--hero-fg); margin-top: calc(-1 * env(safe-area-inset-top, 0px)); padding-top: calc(env(safe-area-inset-top, 0px) + 22px); }
+.hero .wrap { padding-bottom: 30px; display: flex; flex-direction: column; gap: 6px; }
+.hero .eyebrow { font-size: 12px; letter-spacing: .08em; opacity: .85; }
+.hero h1 { font-size: 34px; line-height: 1.15; }
+.hero p { margin: 0; opacity: .92; font-size: 14px; }
+.wave { display: block; width: 100%; height: 20px; fill: var(--bg); margin-top: -1px; }
+
+main { display: flex; flex-direction: column; gap: 14px; padding-top: 4px; }
+.view { display: flex; flex-direction: column; gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card h2 { font-size: 20px; }
+.card h3 { font-size: 17px; }
+.sub { color: var(--muted); font-size: 13px; margin: 0; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.grow { flex: 1 1 0; min-width: 0; }
+
+/* stats */
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stat { background: var(--tint); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; }
+.stat b { font-family: var(--font-display); font-weight: 400; font-size: 28px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.stat b small { font-size: 14px; margin-left: 2px; font-family: var(--font-body); color: var(--muted); }
+.stat span { font-size: 12.5px; color: var(--muted); }
+
+.meter { height: 12px; background: var(--tint); border-radius: 99px; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 99px; min-width: 0; transition: width .4s ease; }
+.goal-line { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.goal-line b { font-variant-numeric: tabular-nums; }
+.inline-num { width: 76px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 4px 8px; text-align: right; }
+
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar { display: grid; grid-template-columns: 78px 1fr 52px; gap: 8px; align-items: center; font-size: 13px; }
+.bar .track { height: 10px; background: var(--tint); border-radius: 99px; overflow: hidden; }
+.bar .track i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+.bar em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+/* sdgs */
+.sdg { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; }
+.sdg .no { width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center; font-family: var(--font-display); font-size: 22px; }
+.sdg b { display: block; font-size: 14px; }
+.sdg span { color: var(--muted); font-size: 13px; }
+
+/* forms */
+label.f { display: flex; flex-direction: column; gap: 5px; font-size: 13px; font-weight: 500; }
+input[type=text], input[type=date], input[type=number], select, textarea {
+  width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 44px;
+}
+textarea { min-height: 88px; resize: vertical; line-height: 1.5; }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.seg button { border: 1px solid var(--line); background: var(--bg); border-radius: 10px; padding: 9px 6px; min-height: 44px; font-size: 13px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 700; }
+.btn { border: 0; background: var(--accent); color: var(--accent-fg); border-radius: 10px; min-height: 46px; padding: 0 18px; font-weight: 700; }
+.btn.ghost { background: var(--tint); color: var(--fg); }
+.btn.small { min-height: 36px; padding: 0 12px; font-size: 13px; border-radius: 8px; }
+.btn.danger { background: var(--bad-bg); color: var(--bad); }
+.photo-pick { display: flex; gap: 12px; align-items: center; }
+.photo-pick img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+.kg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* lists */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 6px 13px; font-size: 13px; min-height: 36px; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.item { display: grid; grid-template-columns: 1fr; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.item:first-child { border-top: 0; padding-top: 0; }
+.item-top { display: flex; gap: 12px; align-items: flex-start; }
+.item-top img { width: 64px; height: 64px; object-fit: cover; border-radius: 10px; flex: none; }
+.item-body { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 3px; }
+.item-body b { font-size: 15px; }
+.item-body p { margin: 0; font-size: 13.5px; }
+.meta { color: var(--muted); font-size: 12.5px; }
+.pill { display: inline-block; border-radius: 99px; padding: 2px 10px; font-size: 12px; font-weight: 700; }
+.pill.s0 { background: var(--bad-bg); color: var(--bad); }
+.pill.s1 { background: var(--warn-bg); color: var(--warn); }
+.pill.s2 { background: var(--good-bg); color: var(--good); }
+.pill.ex { background: var(--tint); color: var(--muted); }
+.sev { letter-spacing: 2px; color: var(--bad); font-size: 12px; }
+.item-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 18px 8px; border: 1px dashed var(--line); border-radius: 12px; }
+.notice { background: var(--warn-bg); color: var(--warn); border-radius: 12px; padding: 12px 14px; font-size: 13px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+
+/* steps */
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.steps button { width: 100%; display: flex; gap: 12px; align-items: center; text-align: left; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 46px; }
+.steps .box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--line); flex: none; display: grid; place-items: center; color: transparent; font-size: 14px; font-weight: 700; }
+.steps button[aria-pressed="true"] { background: var(--tint); }
+.steps button[aria-pressed="true"] .box { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.steps button[aria-pressed="true"] .t { color: var(--muted); text-decoration: line-through; }
+.slogan { display: flex; gap: 10px; align-items: center; justify-content: space-between; background: var(--tint); border-radius: 12px; padding: 12px 14px; }
+.slogan p { margin: 0; font-weight: 500; }
+
+/* nav */
+nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+nav .wrap { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding-top: 6px; padding-bottom: 6px; }
+nav a { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--muted); font-size: 11.5px; padding: 6px 2px; border-radius: 10px; min-height: 52px; justify-content: center; }
+nav a svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+nav a[aria-current="page"] { color: var(--accent); font-weight: 700; background: var(--tint); }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(86px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); border-radius: 99px; padding: 10px 18px; font-size: 13.5px; z-index: 30; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+@media (max-width: 380px) { .bar { grid-template-columns: 64px 1fr 46px; } .hero h1 { font-size: 30px; } }
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">SDGs 6 · 14 · 15 · 17 정책 제안 및 캠페인</span>
+    <h1>하천 지킴이</h1>
+    <p>우리 학교 앞 하천의 쓰레기를 제보하고, 정화 활동을 기록해요.</p>
+  </div>
+  <svg class="wave" viewBox="0 0 400 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 Q50 0 100 10 T200 10 T300 10 T400 10 V20 H0Z"/></svg>
+</header>
+
+<main class="wrap">
+  <section class="view" id="view-home" hidden></section>
+
+  <section class="view" id="view-report" hidden>
+    <form class="card" id="report-form" autocomplete="off">
+      <h2>쓰레기 제보하기</h2>
+      <p class="sub">하천에서 발견한 쓰레기 위치와 종류를 남겨 주세요.</p>
+      <label class="f" for="r-zone">발견한 곳
+        <input type="text" id="r-zone" list="zones" placeholder="예: 학교 앞 다리 밑" required maxlength="40">
+        <datalist id="zones"><option value="학교 앞 다리 밑"><option value="산책로 입구"><option value="하류 보 근처"><option value="둔치 벤치 주변"></datalist>
+      </label>
+      <label class="f" for="r-type">쓰레기 종류
+        <select id="r-type"></select>
+      </label>
+      <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500">
+        <span id="sev-label">심각한 정도</span>
+        <div class="seg" role="group" aria-labelledby="sev-label" id="sev-seg">
+          <button type="button" data-sev="1" aria-pressed="false">조금 있어요</button>
+          <button type="button" data-sev="2" aria-pressed="true">꽤 많아요</button>
+          <button type="button" data-sev="3" aria-pressed="false">매우 심해요</button>
+        </div>
+      </div>
+      <label class="f" for="r-note">자세한 설명 (선택)
+        <textarea id="r-note" maxlength="200" placeholder="예: 페트병이 물가에 모여 있어요."></textarea>
+      </label>
+      <div class="photo-pick">
+        <img id="r-preview" alt="" hidden>
+        <label class="btn ghost small" for="r-photo" style="display:inline-flex;align-items:center">사진 추가</label>
+        <input type="file" id="r-photo" accept="image/*" hidden>
+        <button type="button" class="btn ghost small" id="r-photo-clear" hidden>사진 빼기</button>
+      </div>
+      <button class="btn" type="submit">제보 등록</button>
+    </form>
+    <div class="card">
+      <h2>제보 목록</h2>
+      <div class="chips" id="report-filter" role="group" aria-label="상태로 거르기"></div>
+      <div id="report-list"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-cleanup" hidden>
+    <form class="card" id="clean-form" autocomplete="off">
+      <h2>정화 활동 기록</h2>
+      <p class="sub">수거한 쓰레기 무게를 종류별로 적어 주세요. 단위는 kg이에요.</p>
+      <div class="row">
+        <label class="f grow" for="c-date">날짜<input type="date" id="c-date" required></label>
+        <label class="f grow" for="c-people">참여 인원<input type="number" id="c-people" min="1" max="500" inputmode="numeric" value="5" required></label>
+      </div>
+      <div class="kg-grid" id="kg-grid"></div>
+      <label class="f" for="c-memo">활동 메모 (선택)
+        <textarea id="c-memo" maxlength="200" placeholder="예: 점심시간에 학급 대표 6명이 다리 밑을 정리했어요."></textarea>
+      </label>
+      <button class="btn" type="submit">활동 기록하기</button>
+    </form>
+    <div class="card">
+      <h2>활동 기록</h2>
+      <div id="clean-list"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-campaign" hidden>
+    <div class="card">
+      <h2>활동 흐름 체크</h2>
+      <p class="sub" id="steps-sub"></p>
+      <div class="meter" aria-hidden="true"><i id="steps-meter" style="width:0%"></i></div>
+      <ul class="steps" id="steps"></ul>
+    </div>
+    <div class="card">
+      <h2>캠페인 문구</h2>
+      <p class="sub">포스터, 카드뉴스, 홍보 문구에 바로 쓸 수 있어요.</p>
+      <div id="slogans" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card">
+      <h2>정책 제안 메모</h2>
+      <p class="sub">현황, 원인, 제안 순서로 정리하면 제안서 초안이 돼요.</p>
+      <label class="f" for="p-status">1. 현황
+        <textarea id="p-status" placeholder="하천에서 어떤 문제가 얼마나 일어나고 있나요?"></textarea>
+      </label>
+      <button class="btn ghost small" type="button" data-act="fill-status" style="align-self:flex-start">앱 기록으로 현황 채우기</button>
+      <label class="f" for="p-cause">2. 원인
+        <textarea id="p-cause" placeholder="쓰레기가 생기는 이유를 조사해서 적어 보세요."></textarea>
+      </label>
+      <label class="f" for="p-prop">3. 실현 가능한 제안
+        <textarea id="p-prop" placeholder="예: 다리 입구에 분리수거함 설치, 정기 정화의 날 운영"></textarea>
+      </label>
+      <button class="btn" type="button" data-act="copy-policy">제안 메모 복사</button>
+    </div>
+  </section>
+</main>
+
+<nav aria-label="주요 화면">
+  <div class="wrap">
+    <a href="#home" data-tab="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>현황</a>
+    <a href="#report" data-tab="report"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>제보</a>
+    <a href="#cleanup" data-tab="cleanup"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14l-1.2 13a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9z"/><path d="M9 7V4h6v3"/></svg>정화</a>
+    <a href="#campaign" data-tab="campaign"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l7 4V6L7 10z"/><path d="M17.5 9a4 4 0 0 1 0 6"/></svg>캠페인</a>
+  </div>
+</nav>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  var KEY = "hacheon-jikimi-v1";
+  var TYPES = ["플라스틱", "비닐", "캔·병", "담배꽁초", "음식물·기타"];
+  var STATUS = ["제보됨", "정화 예정", "해결"];
+  var STEPS = ["SDGs 이해", "사회문제 탐색", "관심 목표 선정", "정책 조사 및 제안 계획서 제출", "캠페인 기획", "캠페인 실행 및 성찰", "발표자료 PPT 및 제안서 PDF 제출", "학급별 발표 및 소감문 작성", "학년 발표 및 제안서 전시 활동"];
+  var SLOGANS = ["우리 학교 앞 하천, 우리 손으로 깨끗하게!", "버린 한 개가 바다까지 흘러가요.", "오늘의 한 줌이 내일의 맑은 물이 됩니다.", "하천이 깨끗하면 우리 동네도 환해져요.", "쓰레기는 가방 속으로, 하천은 맑게!"];
+  var SDGS = [
+    { n: 6, name: "깨끗한 물과 위생", how: "하천 수질에 영향을 주는 쓰레기를 줄여요.", bg: "#26BDE2", fg: "#06232B" },
+    { n: 11, name: "지속가능한 도시와 공동체", how: "마을 사람들이 함께 쓰는 산책로를 가꿔요.", bg: "#FD9D24", fg: "#2B1A00" },
+    { n: 14, name: "해양 생태계 보전", how: "하천 쓰레기가 바다로 가는 길을 막아요.", bg: "#0A97D9", fg: "#FFFFFF" },
+    { n: 15, name: "육상 생태계 보전", how: "하천 주변 생물이 살 수 있는 환경을 지켜요.", bg: "#56C02B", fg: "#0C2504" },
+    { n: 17, name: "목표를 위한 파트너십", how: "학교, 지역사회와 함께 정화 활동을 해요.", bg: "#19486A", fg: "#FFFFFF" }
+  ];
+
+  var state = load();
+  var tab = "home", filter = "전체", sev = 2, photo = null, armed = null;
+
+  function seed() {
+    return {
+      goal: 50,
+      reports: [
+        { id: "ex1", ex: 1, zone: "학교 앞 다리 밑", type: "플라스틱", sev: 3, note: "페트병이 물가에 모여 있어요.", date: "2026-11-12", status: 1 },
+        { id: "ex2", ex: 1, zone: "산책로 입구", type: "비닐", sev: 2, note: "나뭇가지에 비닐이 걸려 있어요.", date: "2026-11-13", status: 0 },
+        { id: "ex3", ex: 1, zone: "하류 보 근처", type: "담배꽁초", sev: 1, note: "", date: "2026-11-10", status: 2 }
+      ],
+      cleanups: [
+        { id: "ex4", ex: 1, date: "2026-11-14", people: 8, kg: { "플라스틱": 2.4, "비닐": 1.8, "캔·병": 1.1, "담배꽁초": 0.3, "음식물·기타": 0.9 }, memo: "시범 활동 예시" }
+      ],
+      steps: [1, 1, 1, 0, 0, 0, 0, 0, 0],
+      policy: { status: "", cause: "", prop: "" }
+    };
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) { var s = JSON.parse(raw); if (s && s.reports) return s; }
+    } catch (e) {}
+    return seed();
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); return true; }
+    catch (e) {
+      var dropped = false;
+      for (var i = 0; i < state.reports.length; i++) { if (state.reports[i].photo) { delete state.reports[i].photo; dropped = true; break; } }
+      try { localStorage.setItem(KEY, JSON.stringify(state)); if (dropped) toast("저장 공간이 부족해서 오래된 사진 하나를 뺐어요."); return true; } catch (e2) { return false; }
+    }
+  }
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function fmt(n) { return (Math.round(n * 10) / 10).toLocaleString("ko-KR"); }
+  function uid() { return "u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function today() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function toast(msg) {
+    var t = $("#toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2400);
+  }
+  function totals() {
+    var byType = {}; TYPES.forEach(function (t) { byType[t] = 0; });
+    var kg = 0, people = 0;
+    state.cleanups.forEach(function (c) {
+      people += +c.people || 0;
+      TYPES.forEach(function (t) { var v = +(c.kg && c.kg[t]) || 0; byType[t] += v; kg += v; });
+    });
+    var solved = state.reports.filter(function (r) { return r.status === 2; }).length;
+    return { kg: kg, people: people, byType: byType, solved: solved, total: state.reports.length, runs: state.cleanups.length };
+  }
+
+  /* ---------- home ---------- */
+  function renderHome() {
+    var t = totals(), goal = Math.max(1, +state.goal || 50);
+    var pct = Math.min(100, Math.round((t.kg / goal) * 100));
+    var max = Math.max.apply(null, TYPES.map(function (k) { return t.byType[k]; }).concat([0.1]));
+    var hasEx = state.reports.concat(state.cleanups).some(function (x) { return x.ex; });
+    var h = "";
+    if (hasEx) h += '<div class="notice"><span>\'예시\' 표시가 붙은 기록은 연습용이에요. 발표 전에 지워 주세요.</span><button class="btn small danger" data-act="clear-ex">예시 지우기</button></div>';
+    h += '<div class="card"><h2>우리 하천 현황</h2><div class="stats">' +
+      '<div class="stat"><b>' + fmt(t.kg) + '<small>kg</small></b><span>누적 수거량</span></div>' +
+      '<div class="stat"><b>' + t.runs + '<small>회</small></b><span>정화 활동</span></div>' +
+      '<div class="stat"><b>' + t.people + '<small>명</small></b><span>참여 연인원</span></div>' +
+      '<div class="stat"><b>' + t.solved + '<small>/ ' + t.total + '</small></b><span>해결한 제보</span></div></div></div>';
+    h += '<div class="card"><div class="goal-line"><h3>수거 목표</h3><span class="sub">목표 <input class="inline-num" type="number" id="goal" min="1" max="9999" value="' + goal + '" aria-label="수거 목표 kg"> kg</span></div>' +
+      '<div class="meter" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + pct + '%"></i></div>' +
+      '<p class="sub"><b style="color:var(--fg)">' + pct + '%</b> 달성. ' + fmt(Math.max(0, goal - t.kg)) + 'kg 남았어요.</p></div>';
+    h += '<div class="card"><h3>종류별 수거량</h3><div class="bars">' + TYPES.map(function (k) {
+      return '<div class="bar"><span>' + esc(k) + '</span><div class="track"><i style="width:' + Math.round((t.byType[k] / max) * 100) + '%"></i></div><em>' + fmt(t.byType[k]) + 'kg</em></div>';
+    }).join("") + '</div></div>';
+    h += '<div class="card"><h3>이 앱이 돕는 SDGs 목표</h3>' + SDGS.map(function (s) {
+      return '<div class="sdg"><div class="no" style="background:' + s.bg + ';color:' + s.fg + '">' + s.n + '</div><div><b>' + esc(s.name) + '</b><span>' + esc(s.how) + '</span></div></div>';
+    }).join("") + '</div>';
+    $("#view-home").innerHTML = h;
+  }
+
+  /* ---------- report ---------- */
+  function sevDots(n) { return "●".repeat(n) + "○".repeat(3 - n); }
+  function renderReports() {
+    var f = $("#report-filter");
+    f.innerHTML = ["전체"].concat(STATUS).map(function (s) {
+      return '<button type="button" class="chip" data-filter="' + s + '" aria-pressed="' + (filter === s) + '">' + s + "</button>";
+    }).join("");
+    var list = state.reports.filter(function (r) { return filter === "전체" || STATUS[r.status] === filter; });
+    list.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    $("#report-list").innerHTML = list.length ? list.map(function (r) {
+      var next = r.status < 2 ? "다음: " + STATUS[r.status + 1] : "다시 열기";
+      return '<div class="item"><div class="item-top">' + (r.photo ? '<img src="' + r.photo + '" alt="제보 사진">' : "") +
+        '<div class="item-body"><b>' + esc(r.zone) + '</b><div><span class="pill s' + r.status + '">' + STATUS[r.status] + "</span> " + (r.ex ? '<span class="pill ex">예시</span>' : "") + '</div>' +
+        '<span class="meta">' + esc(r.type) + ' · <span class="sev" aria-label="심각도 ' + r.sev + '/3">' + sevDots(r.sev) + "</span> · " + esc(r.date) + "</span>" +
+        (r.note ? "<p>" + esc(r.note) + "</p>" : "") + '</div></div>' +
+        '<div class="item-actions"><button class="btn small" data-act="advance" data-id="' + r.id + '">' + next + '</button>' +
+        '<button class="btn small danger" data-act="del-report" data-id="' + r.id + '">' + (armed === "r" + r.id ? "정말 삭제" : "삭제") + "</button></div></div>";
+    }).join("") : '<div class="empty">조건에 맞는 제보가 없어요.</div>';
+  }
+
+  /* ---------- cleanup ---------- */
+  function renderCleanups() {
+    var list = state.cleanups.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    $("#clean-list").innerHTML = list.length ? list.map(function (c) {
+      var sum = 0; TYPES.forEach(function (k) { sum += +(c.kg && c.kg[k]) || 0; });
+      var detail = TYPES.filter(function (k) { return +(c.kg && c.kg[k]) > 0; }).map(function (k) { return esc(k) + " " + fmt(c.kg[k]) + "kg"; }).join(" · ");
+      return '<div class="item"><div class="item-body"><b>' + esc(c.date) + " · " + fmt(sum) + 'kg 수거</b>' +
+        '<span class="meta">' + (+c.people || 0) + "명 참여" + (c.ex ? ' · <span class="pill ex">예시</span>' : "") + "</span>" +
+        (detail ? "<p>" + detail + "</p>" : "") + (c.memo ? '<p class="meta">' + esc(c.memo) + "</p>" : "") + "</div>" +
+        '<div class="item-actions"><button class="btn small danger" data-act="del-clean" data-id="' + c.id + '">' + (armed === "c" + c.id ? "정말 삭제" : "삭제") + "</button></div></div>";
+    }).join("") : '<div class="empty">아직 기록이 없어요. 첫 정화 활동을 남겨 보세요.</div>';
+  }
+
+  /* ---------- campaign ---------- */
+  function renderCampaign() {
+    var done = state.steps.reduce(function (a, b) { return a + (b ? 1 : 0); }, 0);
+    $("#steps-sub").textContent = STEPS.length + "단계 중 " + done + "단계 완료";
+    $("#steps-meter").style.width = Math.round((done / STEPS.length) * 100) + "%";
+    $("#steps").innerHTML = STEPS.map(function (s, i) {
+      return '<li><button type="button" data-step="' + i + '" aria-pressed="' + !!state.steps[i] + '"><span class="box" aria-hidden="true">✓</span><span class="t">' + (i + 1) + ". " + esc(s) + "</span></button></li>";
+    }).join("");
+    $("#slogans").innerHTML = SLOGANS.map(function (s, i) {
+      return '<div class="slogan"><p>' + esc(s) + '</p><button class="btn small ghost" data-copy="' + i + '">복사</button></div>';
+    }).join("");
+    ["status", "cause", "prop"].forEach(function (k) {
+      var el = $("#p-" + k); if (el && el.value !== state.policy[k] && document.activeElement !== el) el.value = state.policy[k] || "";
+    });
+  }
+
+  function copyText(text, okMsg) {
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? okMsg : "복사하지 못했어요. 글을 길게 눌러 직접 복사해 주세요.");
+    }
+    try { navigator.clipboard.writeText(text).then(function () { toast(okMsg); }, fallback); } catch (e) { fallback(); }
+  }
+
+  /* ---------- routing ---------- */
+  function show(name) {
+    if (["home", "report", "cleanup", "campaign"].indexOf(name) < 0) name = "home";
+    tab = name;
+    ["home", "report", "cleanup", "campaign"].forEach(function (n) { $("#view-" + n).hidden = n !== name; });
+    document.querySelectorAll("nav a").forEach(function (a) { if (a.dataset.tab === name) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    armed = null;
+    renderAll();
+    window.scrollTo(0, 0);
+  }
+  function renderAll() {
+    if (tab === "home") renderHome();
+    if (tab === "report") renderReports();
+    if (tab === "cleanup") renderCleanups();
+    if (tab === "campaign") renderCampaign();
+  }
+
+  /* ---------- init forms ---------- */
+  $("#r-type").innerHTML = TYPES.map(function (t) { return "<option>" + t + "</option>"; }).join("");
+  $("#kg-grid").innerHTML = TYPES.map(function (t, i) {
+    return '<label class="f" for="kg' + i + '">' + t + ' (kg)<input type="number" id="kg' + i + '" min="0" max="999" step="0.1" inputmode="decimal" placeholder="0"></label>';
+  }).join("");
+  $("#c-date").value = today();
+
+  function shrink(file) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        var im = new Image();
+        im.onload = function () {
+          var s = Math.min(1, 520 / Math.max(im.width, im.height));
+          var c = document.createElement("canvas"); c.width = Math.round(im.width * s); c.height = Math.round(im.height * s);
+          c.getContext("2d").drawImage(im, 0, 0, c.width, c.height);
+          res(c.toDataURL("image/jpeg", 0.6));
+        };
+        im.onerror = rej; im.src = fr.result;
+      };
+      fr.onerror = rej; fr.readAsDataURL(file);
+    });
+  }
+  function setPhoto(url) {
+    photo = url;
+    var p = $("#r-preview"); p.hidden = !url; if (url) p.src = url;
+    $("#r-photo-clear").hidden = !url;
+  }
+
+  $("#r-photo").addEventListener("change", function (e) {
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    shrink(f).then(setPhoto, function () { toast("사진을 불러오지 못했어요."); });
+    e.target.value = "";
+  });
+  $("#r-photo-clear").addEventListener("click", function () { setPhoto(null); });
+  $("#sev-seg").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-sev]"); if (!b) return;
+    sev = +b.dataset.sev;
+    document.querySelectorAll("#sev-seg button").forEach(function (x) { x.setAttribute("aria-pressed", String(+x.dataset.sev === sev)); });
+  });
+
+  $("#report-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var zone = $("#r-zone").value.trim(); if (!zone) return;
+    var r = { id: uid(), zone: zone, type: $("#r-type").value, sev: sev, note: $("#r-note").value.trim(), date: today(), status: 0 };
+    if (photo) r.photo = photo;
+    state.reports.unshift(r);
+    if (!save()) toast("저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요."); else toast("제보를 등록했어요.");
+    $("#r-zone").value = ""; $("#r-note").value = ""; setPhoto(null);
+    filter = "전체"; renderReports();
+  });
+
+  $("#clean-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var kg = {}, sum = 0;
+    TYPES.forEach(function (t, i) { var v = parseFloat($("#kg" + i).value); kg[t] = isNaN(v) || v < 0 ? 0 : v; sum += kg[t]; });
+    if (sum <= 0) { toast("수거량을 하나 이상 적어 주세요."); $("#kg0").focus(); return; }
+    state.cleanups.unshift({ id: uid(), date: $("#c-date").value || today(), people: Math.max(1, parseInt($("#c-people").value, 10) || 1), kg: kg, memo: $("#c-memo").value.trim() });
+    save(); toast(fmt(sum) + "kg 수거 기록을 남겼어요.");
+    TYPES.forEach(function (t, i) { $("#kg" + i).value = ""; }); $("#c-memo").value = "";
+    renderCleanups();
+  });
+
+  ["status", "cause", "prop"].forEach(function (k) {
+    $("#p-" + k).addEventListener("input", function (e) { state.policy[k] = e.target.value; save(); });
+  });
+
+  /* ---------- delegated clicks ---------- */
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-act],[data-filter],[data-step],[data-copy]"); if (!el) return;
+    if (el.dataset.filter) { filter = el.dataset.filter; renderReports(); return; }
+    if (el.dataset.step != null) { var i = +el.dataset.step; state.steps[i] = state.steps[i] ? 0 : 1; save(); renderCampaign(); return; }
+    if (el.dataset.copy != null) { copyText(SLOGANS[+el.dataset.copy], "문구를 복사했어요."); return; }
+    var act = el.dataset.act, id = el.dataset.id;
+    if (act === "advance") {
+      var r = state.reports.filter(function (x) { return x.id === id; })[0];
+      if (r) { r.status = r.status < 2 ? r.status + 1 : 0; save(); renderReports(); }
+    } else if (act === "del-report") {
+      if (armed === "r" + id) { state.reports = state.reports.filter(function (x) { return x.id !== id; }); armed = null; save(); }
+      else armed = "r" + id;
+      renderReports();
+    } else if (act === "del-clean") {
+      if (armed === "c" + id) { state.cleanups = state.cleanups.filter(function (x) { return x.id !== id; }); armed = null; save(); }
+      else armed = "c" + id;
+      renderCleanups();
+    } else if (act === "clear-ex") {
+      state.reports = state.reports.filter(function (x) { return !x.ex; });
+      state.cleanups = state.cleanups.filter(function (x) { return !x.ex; });
+      save(); renderHome(); toast("예시 기록을 지웠어요.");
+    } else if (act === "fill-status") {
+      var t = totals();
+      var open = t.total - t.solved;
+      var parts = TYPES.filter(function (k) { return t.byType[k] > 0; }).map(function (k) { return k + " " + fmt(t.byType[k]) + "kg"; });
+      var line = "우리 학교 앞 하천에 대해 제보 " + t.total + "건을 모았고, 그중 " + t.solved + "건을 해결했으며 " + open + "건이 남아 있다. 정화 활동 " + t.runs + "회에 연인원 " + t.people + "명이 참여해 총 " + fmt(t.kg) + "kg을 수거했다" + (parts.length ? " (" + parts.join(", ") + ")." : ".");
+      var cur = $("#p-status").value.trim();
+      $("#p-status").value = cur ? cur + "\n" + line : line;
+      state.policy.status = $("#p-status").value; save(); toast("현황을 채웠어요. 내용을 고쳐서 쓰세요.");
+    } else if (act === "copy-policy") {
+      var p = state.policy;
+      if (!(p.status || p.cause || p.prop)) { toast("먼저 내용을 적어 주세요."); return; }
+      copyText("[현황]\n" + (p.status || "") + "\n\n[원인]\n" + (p.cause || "") + "\n\n[제안]\n" + (p.prop || ""), "제안 메모를 복사했어요.");
+    }
+  });
+  document.addEventListener("change", function (e) {
+    if (e.target.id === "goal") { state.goal = Math.max(1, parseFloat(e.target.value) || 50); save(); renderHome(); }
+  });
+
+  window.addEventListener("hashchange", function () { show(location.hash.slice(1)); });
+  show(location.hash.slice(1));
+})();
+</script>
+
+</body></html>
